@@ -308,7 +308,7 @@ export const SocketContextProvider = ({ children }) => {
     const SOCKET_URL = import.meta.env.DEV ? "http://localhost:3000" : window.location.origin;
 
     const newSocket = io(SOCKET_URL, {
-      transports: ["websocket"],
+      transports: ["websocket", "polling"], // Try websocket first, fallback to polling
       withCredentials: true,
       query: {
         userId: authUser._id,
