@@ -39,9 +39,14 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 const frontendDistPath = path.join(path.dirname(__dirname), "frontend", "dist");
 app.use(express.static(frontendDistPath));
 
-// Catch-all route for React Router (must be after API routes)
-app.get("/*", (req, res) => {
-  res.sendFile(path.join(frontendDistPath, "index.html"));
+// Fallback to index.html for any non-API routes (for React Router)
+app.use((req, res, next) => {
+  // Only serve index.html for routes that don't start with /api or /uploads
+  if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+    res.sendFile(path.join(frontendDistPath, "index.html"));
+  } else {
+    next();
+  }
 });
 
 
