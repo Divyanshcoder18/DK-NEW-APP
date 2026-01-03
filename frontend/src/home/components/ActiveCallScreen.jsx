@@ -14,8 +14,6 @@ const ActiveCallScreen = () => {
   const [localTracks, setLocalTracks] = useState([]);
   const [remoteUsers, setRemoteUsers] = useState([]);
 
-  if (!activeCall) return null;
-
   useEffect(() => {
     if (!activeCall || !authUser) return;
 
@@ -124,6 +122,8 @@ const ActiveCallScreen = () => {
       }
     };
   }, [activeCall, authUser]);
+
+  if (!activeCall) return null;
 
   const toggleMic = async () => {
     if (localTracks[0]) {
