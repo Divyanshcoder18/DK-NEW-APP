@@ -304,8 +304,8 @@ export const SocketContextProvider = ({ children }) => {
       return;
     }
 
-    // Automatically use environment variable in production, localhost in development
-    const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+    // For single-service deployment: connect to same origin (production) or localhost (dev)
+    const SOCKET_URL = import.meta.env.DEV ? "http://localhost:3000" : window.location.origin;
 
     const newSocket = io(SOCKET_URL, {
       transports: ["websocket"],

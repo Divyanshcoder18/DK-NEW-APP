@@ -1,10 +1,8 @@
 import axios from "axios";
 
-// Use environment variable in production, localhost in development
+// For single-service deployment: use relative paths (production) or localhost (development)
 const API = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL
-    ? `${import.meta.env.VITE_BACKEND_URL}/api`
-    : "http://localhost:3000/api",
+  baseURL: import.meta.env.DEV ? "http://localhost:3000/api" : "/api",
   withCredentials: true,
 });
 

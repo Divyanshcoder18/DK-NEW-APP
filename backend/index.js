@@ -15,14 +15,9 @@ dotenv.config();
 
 const __dirname = path.resolve();
 
-// Allow requests from frontend (both local and production)
-const allowedOrigins = [
-  "http://localhost:5173",  // Local development
-  process.env.FRONTEND_URL  // Production URL from Render
-].filter(Boolean); // Remove undefined values
-
+// CORS - allow localhost for development (production is same-origin)
 app.use(cors({
-  origin: allowedOrigins,
+  origin: "http://localhost:5173",
   credentials: true
 }));
 
@@ -40,14 +35,14 @@ app.use("/api/call", callRouter);
 // Serve uploaded files (images, etc.)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Only serve frontend static files in development (not in production/Render)
-if (process.env.NODE_ENV !== 'production') {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+// Serve frontend static files
+const frontendDistPath = path.join(path.dirname(__dirname), "frontend", "dist");
+app.use(express.static(frontendDistPath));
 
-  app.get(/.*/, (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
-  });
-}
+// Catch-all route for React Router (must be after API routes)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(frontendDistPath, "index.html"));
+});
 
 
 
