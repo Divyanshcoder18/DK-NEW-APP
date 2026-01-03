@@ -17,6 +17,12 @@ const ActiveCallScreen = () => {
   if (!activeCall) return null;
 
   useEffect(() => {
+    if (!activeCall || !authUser) return;
+
+    let mounted = true;
+    let agoraClient = null;
+    let tracks = [];
+
     const initAgora = async () => {
       try {
         const response = await axios.post('/api/call/agora-token', {
@@ -24,9 +30,11 @@ const ActiveCallScreen = () => {
           userId: authUser._id
         });
 
+        if (!mounted) return;
+
         const { token, appId } = response.data;
 
-        const agoraClient = AgoraRTC.createClient({
+        agoraClient = AgoraRTC.createClient({
           mode: 'rtc',
           codec: 'vp8'
         });
@@ -34,34 +42,48 @@ const ActiveCallScreen = () => {
         setClient(agoraClient);
 
         agoraClient.on('user-published', async (user, mediaType) => {
-          await agoraClient.subscribe(user, mediaType);
+          try {
+            await agoraClient.subscribe(user, mediaType);
 
-          if (mediaType === 'video') {
-            const remoteVideoTrack = user.videoTrack;
-            const playerContainer = document.getElementById('remote-video');
-            if (playerContainer) {
-              remoteVideoTrack.play(playerContainer);
+            if (mediaType === 'video') {
+              const remoteVideoTrack = user.videoTrack;
+              const playerContainer = document.getElementById('remote-video');
+              if (playerContainer && remoteVideoTrack) {
+                remoteVideoTrack.play(playerContainer);
+              }
             }
-          }
 
-          if (mediaType === 'audio') {
-            const remoteAudioTrack = user.audioTrack;
-            remoteAudioTrack.play();
-          }
+            if (mediaType === 'audio') {
+              const remoteAudioTrack = user.audioTrack;
+              if (remoteAudioTrack) {
+                remoteAudioTrack.play();
+              }
+            }
 
-          setRemoteUsers((prev) => [...prev, user]);
+            if (mounted) {
+              setRemoteUsers((prev) => [...prev, user]);
+            }
+          } catch (err) {
+            console.error('Error handling user-published:', err);
+          }
         });
 
         agoraClient.on('user-left', (user) => {
-          setRemoteUsers((prev) => prev.filter(u => u.uid !== user.uid));
+          if (mounted) {
+            setRemoteUsers((prev) => prev.filter(u => u.uid !== user.uid));
+          }
         });
 
-        let tracks = [];
         if (activeCall.callType === 'video') {
           tracks = await AgoraRTC.createMicrophoneAndCameraTracks();
         } else {
           const audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
           tracks = [audioTrack];
+        }
+
+        if (!mounted) {
+          tracks.forEach(track => track.close());
+          return;
         }
 
         setLocalTracks(tracks);
@@ -84,15 +106,24 @@ const ActiveCallScreen = () => {
     initAgora();
 
     return () => {
-      localTracks.forEach(track => {
-        track.stop();
-        track.close();
+      mounted = false;
+      tracks.forEach(track => {
+        try {
+          track.stop();
+          track.close();
+        } catch (err) {
+          console.error('Error closing track:', err);
+        }
       });
-      if (client) {
-        client.leave();
+      if (agoraClient) {
+        try {
+          agoraClient.leave();
+        } catch (err) {
+          console.error('Error leaving channel:', err);
+        }
       }
     };
-  }, [activeCall]);
+  }, [activeCall, authUser]);
 
   const toggleMic = async () => {
     if (localTracks[0]) {
