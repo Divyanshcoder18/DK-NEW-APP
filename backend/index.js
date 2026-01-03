@@ -4,6 +4,7 @@ import dbConnect from "./DB/dbConnect.js";
 import authRouter from "./rout/authUser.js";
 import messageRouter from "./rout/messageRout.js";
 import userRouter from "./rout/userRout.js";
+import callRouter from "./rout/callRout.js";
 import cookieParser from "cookie-parser";
 import path from "path";
 import cors from "cors";
@@ -28,6 +29,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/message", messageRouter);
 app.use("/api/user", userRouter);
+app.use("/api/call", callRouter);
 
 // FRONTEND STATIC FILES
 

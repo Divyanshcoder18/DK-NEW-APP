@@ -7,6 +7,8 @@ import { IoAttach } from "react-icons/io5";
 import axios from "axios";
 import { useSocketContext } from "../../context/SocketContext";
 import notify from "../../assets/sound/notification.mp3";
+import { IoCall, IoVideocam } from "react-icons/io5";  // Call icons
+import { useCallContext } from "../../context/CallContext";
 
 const MessageContainer = ({ onBackUser }) => {
   const { messages, selectedConversation, setMessage } = userConversation();
@@ -20,6 +22,27 @@ const MessageContainer = ({ onBackUser }) => {
   const fileInputRef = useRef(null); //fileInputRef - Reference to the hidden <input type="file"> so we can trigger it with a button click
 
   const lastMessageRef = useRef();
+
+  const { startCall } = useCallContext();
+
+  // call handlers
+
+
+  const handleVoiceCall = () => {
+    startCall(
+      selectedConversation._id,        // Who to call (their ID)
+      selectedConversation.username,   // Their name
+      'voice'                          // Call type
+    );
+  };
+
+  const handleVideoCall = () => {
+    startCall(
+      selectedConversation._id,        // Who to call (their ID)
+      selectedConversation.username,   // Their name
+      'video'                          // Call type
+    );
+  };
 
   // 🔌 Socket Listener
   useEffect(() => {
@@ -238,7 +261,29 @@ const MessageContainer = ({ onBackUser }) => {
             </span>
           </div>
         </div>
+
+        {/* 📞 CALL BUTTONS */}
+        <div className="flex items-center gap-2">
+          {/* Voice Call Button */}
+          <button
+            onClick={handleVoiceCall}
+            className="p-3 bg-[#2a2a2d] rounded-full text-gray-200 hover:bg-green-600 hover:text-white transition-all duration-200 shadow-md hover:shadow-green-600/50"
+            title="Voice Call"
+          >
+            <IoCall size={20} />
+          </button>
+
+          {/* Video Call Button */}
+          <button
+            onClick={handleVideoCall}
+            className="p-3 bg-[#2a2a2d] rounded-full text-gray-200 hover:bg-blue-600 hover:text-white transition-all duration-200 shadow-md hover:shadow-blue-600/50"
+            title="Video Call"
+          >
+            <IoVideocam size={20} />
+          </button>
+        </div>
       </div>
+
 
       {/* 💬 MESSAGES */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -274,7 +319,7 @@ const MessageContainer = ({ onBackUser }) => {
                     }
                   `}
                 >
-                  {renderMessage(msg)}
+                  {rendermessage(msg)}
 
 
                   <p

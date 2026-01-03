@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import MessageContainer from './components/MessageContainer';
+import IncomingCallModal from './components/IncomingCallModal';
+import ActiveCallScreen from './components/ActiveCallScreen';
 
 const Home = () => {
   const [selectedUser, setSelectedUser] = useState(null);
@@ -34,6 +36,16 @@ const Home = () => {
       `}>
         <MessageContainer onBackUser={handleShowSidebar} />
       </div>
+
+      {/* ───────────────────────────────────────────────────── */}
+      {/* CALL COMPONENTS (Appear on top when needed)          */}
+      {/* ───────────────────────────────────────────────────── */}
+
+      {/* Shows when someone calls you */}
+      <IncomingCallModal />
+
+      {/* Shows when you're in an active call */}
+      <ActiveCallScreen />
     </div>
   );
 };

@@ -35,6 +35,15 @@
   /* Zinc-800 */
 }
 
+/* Ensure full height for app */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);

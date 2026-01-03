@@ -50,15 +50,12 @@ const messageSchema = mongoose.Schema({
         type:String,
         required:false,
     },
-
-
-
     fileUrl:{
         type:String,
         default: null ,
     },
 
-        fileName: {
+    fileName: {
     type: String,
     default: null
 },

@@ -284,7 +284,7 @@ export const SocketContextProvider = ({ children }) => {
 */
 
 
- 
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
@@ -304,7 +304,12 @@ export const SocketContextProvider = ({ children }) => {
       return;
     }
 
-     const newSocket = io("https://divyansh-chat-app-tkuh.onrender.com", {
+    // 🔧 FOR LOCAL TESTING: Use localhost
+    const newSocket = io("http://localhost:3000", {
+
+      // 🚀 FOR PRODUCTION: Uncomment this line and comment localhost
+      // const newSocket = io("https://divyansh-chat-app-tkuh.onrender.com", {
+
       transports: ["websocket"],
       withCredentials: true,
       query: {
@@ -324,7 +329,7 @@ export const SocketContextProvider = ({ children }) => {
       setOnlineUser(users);
     });
 
-       setSocket(newSocket);
+    setSocket(newSocket);
 
     return () => {
       newSocket.disconnect();
@@ -335,5 +340,5 @@ export const SocketContextProvider = ({ children }) => {
     <SocketContext.Provider value={{ socket, onlineUser }}>
       {children}
     </SocketContext.Provider>
-  );
+  );
 };
