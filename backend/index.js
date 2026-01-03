@@ -37,20 +37,17 @@ app.use("/api/message", messageRouter);
 app.use("/api/user", userRouter);
 app.use("/api/call", callRouter);
 
-// FRONTEND STATIC FILES
-
-//app.use(express.static(path.join(__dirname, "frontend", "dist")));
-
-//app.get(/.*/, (req, res) => {
-// res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
-//});
-
+// Serve uploaded files (images, etc.)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
-});
+// Only serve frontend static files in development (not in production/Render)
+if (process.env.NODE_ENV !== 'production') {
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+  app.get(/.*/, (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+  });
+}
 
 
 
