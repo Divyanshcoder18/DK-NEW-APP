@@ -3,6 +3,7 @@ import userConversation from "../../Zustans/useConversation";
 import { useAuth } from "../../context/AuthContext";
 import { TiMessages } from "react-icons/ti";
 import { IoArrowBackSharp, IoSend } from "react-icons/io5";
+import { IoAttach } from "react-icons/io5";
 import axios from "axios";
 import { useSocketContext } from "../../context/SocketContext";
 import notify from "../../assets/sound/notification.mp3";
@@ -15,6 +16,8 @@ const MessageContainer = ({ onBackUser }) => {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendData, setSendData] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);  //selectedFile - Stores the file user picks
+  const fileInputRef = useRef(null); //fileInputRef - Reference to the hidden <input type="file"> so we can trigger it with a button click
 
   const lastMessageRef = useRef();
 
@@ -85,6 +88,98 @@ const MessageContainer = ({ onBackUser }) => {
     }
     setSending(false);
   };
+
+  const handleFileupload = async (file = null) => {
+    const fileToUpload = file || selectedFile;
+    if (!fileToUpload) {
+      return;
+    }
+    setSending(true);
+
+    /*
+    Gets the receiver's ID from the selected conversation
+    Why: Backend needs to know WHO you're sending the file to
+    The ?.: Safe navigation - if selectedConversation is null, doesn't crash
+    The ||: Tries userId first, if not exists uses _id
+    */
+    const receiverId = selectedConversation?.userId || selectedConversation?._id;
+
+
+    // Creates a special container for file data
+    // Files can't be sent as regular JSON - they need FormData
+
+    try {
+      // form sata bna file uploads ke liye 
+      const formData = new FormData();
+      formData.append('file', fileToUpload);
+      const res = await axios.post(
+        `/api/message/upload/${selectedConversation._id}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+
+      /*
+  URL: /api/message/upload/12345 (12345 is conversation ID)
+  Data: The FormData with your file
+  Headers: Tells server "this is a file upload, not JSON"
+      */
+      const sentMessage = res.data;
+
+      socket.emit('sendMessage', {
+        senderId: authUser._id,
+        receiverId,
+        message: sentMessage,
+
+
+      });
+
+      setMessage(prev => [...prev, sentMessage]);
+      setSelectedFile(null);
+    }
+    catch (err) {
+      console.log(err);
+    }
+    setSending(false);
+
+  }
+  const rendermessage = (msg) => {
+    if (msg.fileUrl) {
+      if (msg.fileType && msg.fileType.startsWith('image/')) {
+        return (
+          <img
+            src={msg.fileUrl}
+            alt={msg.fileName}
+            className="max-w-[200px] rounded-lg cursor-pointer"
+          />
+        );
+      }
+      else {
+        // NO - It's a PDF/doc, show download link
+        return (
+          <a
+            href={msg.fileUrl}
+            download={msg.fileName}
+            className="flex items-center gap-2 underline"
+          >
+            📎 {msg.fileName}
+          </a>
+        );
+
+
+
+      }
+
+    }
+    else {
+      return <p>{msg.message}</p>;
+    }
+  }
+
+
 
   if (!selectedConversation) {
     return (
@@ -179,7 +274,8 @@ const MessageContainer = ({ onBackUser }) => {
                     }
                   `}
                 >
-                  <p>{msg.message}</p>
+                  {renderMessage(msg)}
+
 
                   <p
                     className={`text-[10px] mt-1 text-right opacity-60 ${isMe ? "text-gray-200" : "text-gray-400"
@@ -201,7 +297,36 @@ const MessageContainer = ({ onBackUser }) => {
         onSubmit={handleSubmit}
         className="p-4 bg-[#1a1a1d]/70 border-t border-gray-800 backdrop-blur-xl shadow-inner"
       >
+
+
+
+
+
         <div className="flex items-center gap-2">
+          {/* Hidden File Input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,.pdf,.doc,.docx"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                setSelectedFile(file);
+                handleFileupload(file); // Auto-upload when file is selected
+              }
+            }}
+            className="hidden"
+          />
+
+          {/* Attachment Button */}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="p-3 bg-[#2a2a2d] rounded-xl text-gray-200 hover:bg-[#3a3a3d] transition-colors"
+            title="Attach file"
+          >
+            <IoAttach size={18} />
+          </button>
 
           <input
             value={sendData}

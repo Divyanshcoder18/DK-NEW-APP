@@ -73,6 +73,63 @@ try {
 
 
 
+export const sendFileMessage = async (req, res) => {
+    try {
+        const { id: reciverId } = req.params;
+        const senderId = req.user._conditions._id;
+
+        if (!req.file) {
+            return res.status(400).send({ error: 'No file uploaded' });
+        }
+
+        let chats = await Conversation.findOne({
+            participants: { $all: [senderId, reciverId] }
+        });
+
+        if (!chats) {
+            chats = await Conversation.create({
+                participants: [senderId, reciverId],
+            });
+        }
+
+        const newMessage = new Message({
+            senderId,
+            reciverId,
+            message: null,
+            fileUrl: `/uploads/${req.file.filename}`,
+            fileName: req.file.originalname,
+            fileType: req.file.mimetype,
+            fileSize: req.file.size,
+            conversationId: chats._id
+        });
+
+        if (newMessage) {
+            chats.messages.push(newMessage._id);
+        }
+
+        await Promise.all([chats.save(), newMessage.save()]);
+
+        const reciverSocketId = getReciverSocketId(reciverId);
+        if (reciverSocketId) {
+            io.to(reciverSocketId).emit("newMessage", newMessage);
+        }
+
+        res.status(201).send(newMessage);
+
+    } catch (error) {
+        console.log(`Error in sendFileMessage: ${error}`);
+        res.status(500).send({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+
+
+
+
 /*import Message from "../Models/messageSchema.js";
 import Conversation from "../Models/conversationModels.js";
 
