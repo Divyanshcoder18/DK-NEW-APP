@@ -15,8 +15,14 @@ dotenv.config();
 
 const __dirname = path.resolve();
 
+// Allow requests from frontend (both local and production)
+const allowedOrigins = [
+  "http://localhost:5173",  // Local development
+  process.env.FRONTEND_URL  // Production URL from Render
+].filter(Boolean); // Remove undefined values
+
 app.use(cors({
-  origin: ["http://localhost:5173", "https://divyansh-chat-app-tkuh.onrender.com"],
+  origin: allowedOrigins,
   credentials: true
 }));
 

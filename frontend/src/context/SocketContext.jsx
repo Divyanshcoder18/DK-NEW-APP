@@ -304,12 +304,10 @@ export const SocketContextProvider = ({ children }) => {
       return;
     }
 
-    // 🔧 FOR LOCAL TESTING: Use localhost
-    const newSocket = io("http://localhost:3000", {
+    // Automatically use environment variable in production, localhost in development
+    const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
-      // 🚀 FOR PRODUCTION: Uncomment this line and comment localhost
-      // const newSocket = io("https://divyansh-chat-app-tkuh.onrender.com", {
-
+    const newSocket = io(SOCKET_URL, {
       transports: ["websocket"],
       withCredentials: true,
       query: {
