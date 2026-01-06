@@ -12,7 +12,7 @@ import { useCallContext } from "../../context/CallContext";
 
 const MessageContainer = ({ onBackUser }) => {
   const { messages, selectedConversation, setMessage } = userConversation();
-  const { socket } = useSocketContext();
+  const { socket, onlineUser } = useSocketContext();
   const { authUser } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -265,8 +265,11 @@ const MessageContainer = ({ onBackUser }) => {
             <span className="text-white font-bold text-lg leading-tight">
               {selectedConversation?.username}
             </span>
-            <span className="text-green-400 text-xs font-medium">
-              Online
+            <span className={`text-xs font-medium ${onlineUser?.includes(selectedConversation?._id?.toString())
+                ? 'text-green-400'
+                : 'text-gray-400'
+              }`}>
+              {onlineUser?.includes(selectedConversation?._id?.toString()) ? 'Online' : 'Offline'}
             </span>
           </div>
         </div>
@@ -351,18 +354,17 @@ const MessageContainer = ({ onBackUser }) => {
           })}
       </div>
 
-      {/* ✍️ INPUT AREA - Always sticky at bottom */}
+      {/* ✍️ INPUT AREA - Fixed at bottom */}
       <form
         onSubmit={handleSubmit}
         className="
-          sticky bottom-0
+          fixed md:relative
+          bottom-0 left-0 right-0
           p-3 md:p-4
-          bg-[#1a1a1d]/95
+          bg-[#1a1a1d]
           border-t border-gray-800
-          backdrop-blur-xl
-          shadow-inner
-          flex-shrink-0
-          z-20
+          shadow-lg
+          z-50
         "
       >
 
