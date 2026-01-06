@@ -20,6 +20,8 @@ const MessageContainer = ({ onBackUser }) => {
   const [sendData, setSendData] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);  //selectedFile - Stores the file user picks
   const fileInputRef = useRef(null); //fileInputRef - Reference to the hidden <input type="file"> so we can trigger it with a button click
+  const [imageModal, setImageModal] = useState({ open: false, url: '', name: '' }); // Image modal state
+  const [shouldScroll, setShouldScroll] = useState(true); // Control auto-scroll
 
   const lastMessageRef = useRef();
 
@@ -58,12 +60,15 @@ const MessageContainer = ({ onBackUser }) => {
     return () => socket.off("newMessage", handleNewMessage);
   }, [socket, authUser?._id, setMessage]);
 
-  // 📜 Auto Scroll
+  // 📜 Auto Scroll - only when user sends a message
   useEffect(() => {
-    setTimeout(() => {
-      lastMessageRef?.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
-  }, [messages]);
+    if (shouldScroll) {
+      setTimeout(() => {
+        lastMessageRef?.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+      setShouldScroll(false); // Reset after scrolling
+    }
+  }, [messages, shouldScroll]);
 
   // 📥 Fetch Messages
   useEffect(() => {
@@ -106,6 +111,7 @@ const MessageContainer = ({ onBackUser }) => {
 
       setMessage((prev) => [...prev, sentMessage]);
       setSendData("");
+      setShouldScroll(true); // Enable scroll when user sends a message
     } catch (err) {
       console.log(err);
     }
@@ -162,6 +168,7 @@ const MessageContainer = ({ onBackUser }) => {
 
       setMessage(prev => [...prev, sentMessage]);
       setSelectedFile(null);
+      setShouldScroll(true); // Enable scroll when user sends a file
     }
     catch (err) {
       console.log(err);
@@ -176,7 +183,8 @@ const MessageContainer = ({ onBackUser }) => {
           <img
             src={msg.fileUrl}
             alt={msg.fileName}
-            className="max-w-[200px] rounded-lg cursor-pointer"
+            className="max-w-[200px] rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => setImageModal({ open: true, url: msg.fileUrl, name: msg.fileName })}
           />
         );
       }
@@ -394,6 +402,29 @@ const MessageContainer = ({ onBackUser }) => {
           </button>
         </div>
       </form>
+
+      {/* 🖼️ IMAGE MODAL */}
+      {imageModal.open && (
+        <div
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setImageModal({ open: false, url: '', name: '' })}
+        >
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <button
+              onClick={() => setImageModal({ open: false, url: '', name: '' })}
+              className="absolute -top-10 right-0 text-white text-2xl hover:text-gray-300 transition-colors"
+            >
+              ✕
+            </button>
+            <img
+              src={imageModal.url}
+              alt={imageModal.name}
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

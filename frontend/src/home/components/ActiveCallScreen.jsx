@@ -132,6 +132,7 @@ const ActiveCallScreen = () => {
     }
   };
 
+  
   const toggleVideo = async () => {
     if (activeCall.callType === 'video' && localTracks[1]) {
       await localTracks[1].setEnabled(!isVideoOff);
