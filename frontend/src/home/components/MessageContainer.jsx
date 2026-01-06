@@ -226,12 +226,16 @@ const MessageContainer = ({ onBackUser }) => {
   }
 
   return (
-    // 🌙 CLASSY PREMIUM DARK BACKGROUND - Fixed height for mobile
-    <div className="flex flex-col 
-      h-screen md:h-full
+    // 🌙 CLASSY PREMIUM DARK BACKGROUND
+    <div className="
+      flex flex-col
+      h-full w-full
+      max-h-screen
       bg-gradient-to-b 
       from-[#1c1c1f] via-[#141416] to-[#0e0e10] 
-      text-white">
+      text-white
+      relative
+    ">
 
       {/* 🟢 TOP HEADER (Frosted Glass) */}
       <div className="flex items-center justify-between 
@@ -290,8 +294,13 @@ const MessageContainer = ({ onBackUser }) => {
       </div>
 
 
-      {/* 💬 MESSAGES */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+      {/* 💬 MESSAGES - With proper height calc */}
+      <div className="
+        flex-1
+        overflow-y-auto overflow-x-hidden
+        p-4 space-y-4
+        pb-2
+      ">
 
         {loading && (
           <div className="flex items-center justify-center h-full">
@@ -342,10 +351,19 @@ const MessageContainer = ({ onBackUser }) => {
           })}
       </div>
 
-      {/* ✍️ INPUT AREA (Glass Dark Bar) */}
+      {/* ✍️ INPUT AREA - Always sticky at bottom */}
       <form
         onSubmit={handleSubmit}
-        className="p-4 bg-[#1a1a1d]/70 border-t border-gray-800 backdrop-blur-xl shadow-inner flex-shrink-0 pb-safe"
+        className="
+          sticky bottom-0
+          p-3 md:p-4
+          bg-[#1a1a1d]/95
+          border-t border-gray-800
+          backdrop-blur-xl
+          shadow-inner
+          flex-shrink-0
+          z-20
+        "
       >
 
 
