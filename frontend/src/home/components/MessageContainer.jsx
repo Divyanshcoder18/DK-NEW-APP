@@ -158,13 +158,8 @@ const MessageContainer = ({ onBackUser }) => {
       */
       const sentMessage = res.data;
 
-      socket.emit('sendMessage', {
-        senderId: authUser._id,
-        receiverId,
-        message: sentMessage,
-
-
-      });
+      // Emit sentMessage directly - it already has senderId, receiverId, fileUrl, etc.
+      socket.emit('sendMessage', sentMessage);
 
       setMessage(prev => [...prev, sentMessage]);
       setSelectedFile(null);
@@ -231,12 +226,12 @@ const MessageContainer = ({ onBackUser }) => {
   }
 
   return (
-    // 🌙 CLASSY PREMIUM DARK BACKGROUND
-    <div className="flex flex-col h-full 
+    // 🌙 CLASSY PREMIUM DARK BACKGROUND - Fixed height for mobile
+    <div className="flex flex-col 
+      h-screen md:h-full
       bg-gradient-to-b 
       from-[#1c1c1f] via-[#141416] to-[#0e0e10] 
-      text-white
-      overflow-hidden">
+      text-white">
 
       {/* 🟢 TOP HEADER (Frosted Glass) */}
       <div className="flex items-center justify-between 

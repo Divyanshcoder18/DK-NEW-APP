@@ -19,10 +19,10 @@ const Home = () => {
   };
 
   return (
-    <div className="flex w-full h-full bg-bg-primary overflow-hidden">
+    <div className="flex w-full h-screen bg-bg-primary overflow-hidden">
       {/* SIDEBAR WRAPPER */}
       <div className={`
-        w-full md:w-[320px] md:flex h-full border-r border-border
+        w-full md:w-[380px] md:flex h-full border-r border-border
         ${isSidebarVisible ? 'block' : 'hidden'} 
         ${selectedUser ? 'hidden md:block' : 'block'}
       `}>
