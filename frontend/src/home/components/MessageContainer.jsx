@@ -237,13 +237,19 @@ const MessageContainer = ({ onBackUser }) => {
       relative
     ">
 
-      {/* 🟢 TOP HEADER (Frosted Glass) */}
-      <div className="flex items-center justify-between 
-        px-6 py-4 
+      {/* 🟢 TOP HEADER - Fixed on mobile */}
+      <div className="
+        fixed md:sticky
+        top-0 left-0 right-0
+        md:relative
+        flex items-center justify-between 
+        px-4 md:px-6 py-3 md:py-4
         border-b border-gray-800 
-        bg-[#1c1c1f]/70 backdrop-blur-xl 
-        sticky top-0 z-10 shadow-md
-        flex-shrink-0">
+        bg-[#1c1c1f] backdrop-blur-xl 
+        z-40
+        shadow-md
+        flex-shrink-0
+      ">
 
         <div className="flex items-center gap-4">
           {/* BACK BUTTON */}
@@ -266,8 +272,8 @@ const MessageContainer = ({ onBackUser }) => {
               {selectedConversation?.username}
             </span>
             <span className={`text-xs font-medium ${onlineUser?.includes(selectedConversation?._id?.toString())
-                ? 'text-green-400'
-                : 'text-gray-400'
+              ? 'text-green-400'
+              : 'text-gray-400'
               }`}>
               {onlineUser?.includes(selectedConversation?._id?.toString()) ? 'Online' : 'Offline'}
             </span>
@@ -297,12 +303,13 @@ const MessageContainer = ({ onBackUser }) => {
       </div>
 
 
-      {/* 💬 MESSAGES - With proper height calc */}
+      {/* 💬 MESSAGES - With top padding for fixed header */}
       <div className="
         flex-1
         overflow-y-auto overflow-x-hidden
         p-4 space-y-4
-        pb-2
+        pt-20 md:pt-4
+        pb-20
       ">
 
         {loading && (
