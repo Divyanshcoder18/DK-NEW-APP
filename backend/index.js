@@ -30,7 +30,7 @@ app.use(cookieParser());
 
 // API ROUTES FIRST (VERY IMPORTANT)
 app.use("/api/auth", authRouter);
-app.use("/api/room",roomRouter);  
+app.use("/api/room", roomRouter);
 app.use("/api/message", messageRouter);
 app.use("/api/user", userRouter);
 app.use("/api/call", callRouter);
@@ -39,7 +39,7 @@ app.use("/api/call", callRouter);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Serve frontend static files
-const frontendDistPath = path.join(path.dirname(__dirname), "frontend", "dist");
+const frontendDistPath = path.join(__dirname, "..", "frontend", "dist");
 app.use(express.static(frontendDistPath));
 
 // Fallback to index.html for any non-API routes (for React Router)
