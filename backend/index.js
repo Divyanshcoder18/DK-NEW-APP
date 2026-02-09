@@ -9,6 +9,7 @@ import callRouter from "./rout/callRout.js";
 import cookieParser from "cookie-parser";
 
 import path from "path";
+import fs from "fs";
 import cors from "cors";
 
 import { app, server } from "./Socket/socket.js";
@@ -38,19 +39,25 @@ app.use("/api/call", callRouter);
 // Serve uploaded files (images, etc.)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Serve frontend static files
+// Serve frontend static files - Only in production
 const frontendDistPath = path.join(__dirname, "..", "frontend", "dist");
-app.use(express.static(frontendDistPath));
 
-// Fallback to index.html for any non-API routes (for React Router)
-app.use((req, res, next) => {
-  // Only serve index.html for routes that don't start with /api or /uploads
-  if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
-    res.sendFile(path.join(frontendDistPath, "index.html"));
-  } else {
-    next();
-  }
-});
+// Check if we're in production and dist folder exists
+if (fs.existsSync(frontendDistPath)) {
+  console.log('✅ Serving frontend from:', frontendDistPath);
+  app.use(express.static(frontendDistPath));
+
+  // Fallback to index.html for any non-API routes (for React Router)
+  app.get('*', (req, res) => {
+    // Only serve index.html for routes that don't start with /api or /uploads
+    if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+      res.sendFile(path.join(frontendDistPath, "index.html"));
+    }
+  });
+} else {
+  console.log('⚠️ Frontend dist folder not found. Running in API-only mode.');
+  console.log('📍 Looking for dist at:', frontendDistPath);
+}
 
 
 
