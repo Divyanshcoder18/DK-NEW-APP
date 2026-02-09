@@ -106,6 +106,21 @@ io.on("connection", (socket) => {
       console.log("📨 Forwarded to receiver:", receiverSocketId);
     }
   });
+  socket.on("join-room", ({ roomId }) => {
+    socket.join(roomId);
+    console.log(`👋 User ${userId} joined room ${roomId}`);
+
+  });
+
+  socket.on("leave-room", ({ roomId }) => {
+    socket.leave(roomId);
+    console.log(`👋 User ${userId} left room ${roomId}`);
+  });
+  socket.on("room-message", (data) => { // listens for room message // frontend must use: socket.emit("room-message", data);
+    const { message, roomId } = data;
+    io.to(roomId).emit("new-room-message", data);
+    console.log(`📨 Message sent to room ${roomId}`);
+  });
 
   socket.on("call-user", ({ to, callType, channelName, callerName }) => {
     console.log(`📞 ${callType} call initiated from ${userId} to ${to}`);

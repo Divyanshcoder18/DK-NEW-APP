@@ -288,6 +288,7 @@ export const SocketContextProvider = ({ children }) => {
 import { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
+import userConversation from "../Zustans/useConversation";  // ✅ Added for room messages
 
 const SocketContext = createContext();
 export const useSocketContext = () => useContext(SocketContext);
@@ -327,13 +328,25 @@ export const SocketContextProvider = ({ children }) => {
       setOnlineUser(users);
     });
 
+    // ✅ Listen for new room messages (MOVED INSIDE useEffect)
+    newSocket.on("new-room-message", (data) => {
+      console.log("📨 Room message received:", data);
+
+      const { setRoomMessages, selectedRoom } = userConversation.getState();
+
+      // Only update if message is for the currently selected room
+      if (selectedRoom && data.roomId === selectedRoom._id) {
+        setRoomMessages((prevMessages) => [...prevMessages, data]);
+      }
+    });
+
     setSocket(newSocket);
 
     return () => {
+      newSocket.off("new-room-message");  // ✅ Cleanup room listener
       newSocket.disconnect();
     };
   }, [authUser]);
-
   return (
     <SocketContext.Provider value={{ socket, onlineUser }}>
       {children}

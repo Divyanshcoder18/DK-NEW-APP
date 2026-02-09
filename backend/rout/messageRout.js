@@ -14,13 +14,14 @@ export default router
 */
 
 import express from "express"
-import { getMessages, sendMessage, sendFileMessage } from "../routControlers/messageroutControler.js";
+import { getMessages, sendMessage, sendFileMessage, sendRoomMessage } from "../routControlers/messageroutControler.js";
 import isLogin from "../middleware/isLogin.js";
 import upload from "../utils/fileUpload.js";
 
 const router = express.Router();
 
-router.post('/send/:id',isLogin , sendMessage)
+router.post('/send/:id',isLogin , sendMessage);
+router.post('/send/room/:roomId', isLogin, sendRoomMessage);
 
 router.get('/:id',isLogin , getMessages);
 router.post('/upload/:id', isLogin, upload.single('file'), sendFileMessage); // ye frontend se data lega vo yhan aayega mess container.jsx dekh lio 

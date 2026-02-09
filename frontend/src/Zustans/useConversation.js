@@ -21,7 +21,37 @@ const userConversation = create((set) => ({
             console.log("🔷 [ZUSTAND] Setting messages directly:", messages);
             set({ messages });
         }
+    },
+
+    // Rooms list
+    rooms: [],
+    setRooms: (rooms) => {
+        console.log("🏠 [ZUSTAND] setRooms called with:", rooms);
+        set({ rooms });
+    },
+
+    // Selected room
+    selectedRoom: null,
+    setSelectedRoom: (selectedRoom) => {
+        console.log("🏠 [ZUSTAND] setSelectedRoom called with:", selectedRoom);
+        set({ selectedRoom });
+    },
+
+    // Room messages
+    roomMessages: [],
+    setRoomMessages: (roomMessages) => {
+        console.log("🏠 [ZUSTAND] setRoomMessages called with:", roomMessages);
+        if (typeof roomMessages === 'function') {
+            set((state) => {
+                const newMessages = roomMessages(state.roomMessages);
+                console.log("🏠 [ZUSTAND] Previous room messages:", state.roomMessages);
+                console.log("🏠 [ZUSTAND] New room messages:", newMessages);
+                return { roomMessages: newMessages };
+            });
+        } else {
+            set({ roomMessages });
+        }
     }
 }));
 
-export default userConversation
+export default userConversation;

@@ -1,21 +1,31 @@
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import MessageContainer from './components/MessageContainer';
+import RoomMessageContainer from './components/RoomMessageContainer';
 import IncomingCallModal from './components/IncomingCallModal';
 import ActiveCallScreen from './components/ActiveCallScreen';
+import userConversation from '../Zustans/useConversation';
 
 const Home = () => {
-  const [selectedUser, setSelectedUser] = useState(null);
+  const { selectedConversation, selectedRoom, setSelectedConversation, setSelectedRoom } = userConversation();
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
   const handleUserSelect = (user) => {
-    setSelectedUser(user);
+    setSelectedConversation(user);
+    setSelectedRoom(null); // Clear room selection
+    setIsSidebarVisible(false);
+  };
+
+  const handleRoomSelect = (room) => {
+    setSelectedRoom(room);
+    setSelectedConversation(null); // Clear user selection
     setIsSidebarVisible(false);
   };
 
   const handleShowSidebar = () => {
     setIsSidebarVisible(true);
-    setSelectedUser(null);
+    setSelectedConversation(null);
+    setSelectedRoom(null);
   };
 
   return (
@@ -24,22 +34,26 @@ const Home = () => {
       <div className={`
         w-full md:w-[380px] md:flex h-full border-r border-border
         ${isSidebarVisible ? 'block' : 'hidden'} 
-        ${selectedUser ? 'hidden md:block' : 'block'}
+        ${(selectedConversation || selectedRoom) ? 'hidden md:block' : 'block'}
       `}>
-        <Sidebar onSelectUser={handleUserSelect} />
+        <Sidebar
+          onSelectUser={handleUserSelect}
+          onSelectRoom={handleRoomSelect}
+        />
       </div>
 
       {/* MESSAGE CONTAINER WRAPPER */}
       <div className={`
         flex-1 h-full bg-bg-primary
-        ${selectedUser ? 'block' : 'hidden md:flex items-center justify-center'}
+        ${(selectedConversation || selectedRoom) ? 'block' : 'hidden md:flex items-center justify-center'}
       `}>
-        <MessageContainer onBackUser={handleShowSidebar} />
+        {/* Show RoomMessageContainer if room is selected, otherwise MessageContainer */}
+        {selectedRoom ? (
+          <RoomMessageContainer onBackToRooms={handleShowSidebar} />
+        ) : (
+          <MessageContainer onBackUser={handleShowSidebar} />
+        )}
       </div>
-
-      {/* ───────────────────────────────────────────────────── */}
-      {/* CALL COMPONENTS (Appear on top when needed)          */}
-      {/* ───────────────────────────────────────────────────── */}
 
       {/* Shows when someone calls you */}
       <IncomingCallModal />

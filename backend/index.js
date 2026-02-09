@@ -3,9 +3,11 @@ import dotenv from "dotenv";
 import dbConnect from "./DB/dbConnect.js";
 import authRouter from "./rout/authUser.js";
 import messageRouter from "./rout/messageRout.js";
+import roomRouter from "./rout/roomRout.js";
 import userRouter from "./rout/userRout.js";
 import callRouter from "./rout/callRout.js";
 import cookieParser from "cookie-parser";
+
 import path from "path";
 import cors from "cors";
 
@@ -28,6 +30,7 @@ app.use(cookieParser());
 
 // API ROUTES FIRST (VERY IMPORTANT)
 app.use("/api/auth", authRouter);
+app.use("/api/room",roomRouter);  
 app.use("/api/message", messageRouter);
 app.use("/api/user", userRouter);
 app.use("/api/call", callRouter);

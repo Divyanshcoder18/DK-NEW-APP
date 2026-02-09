@@ -8,8 +8,11 @@ import { IoArrowBackSharp } from "react-icons/io5";
 import { BiLogOut } from "react-icons/bi";
 import userConversation from "../../Zustans/useConversation";
 import { useSocketContext } from "../../context/SocketContext";
+import RoomList from "./RoomList";
+import CreateRoomModal from "./CreateRoomModal";
+import JoinRoomModal from "./JoinRoomModal";
 
-const Sidebar = ({ onSelectUser }) => {
+const Sidebar = ({ onSelectUser, onSelectRoom }) => {
   const navigate = useNavigate();
   const { authUser, setAuthUser } = useAuth();
 
@@ -19,6 +22,11 @@ const Sidebar = ({ onSelectUser }) => {
   const [loading, setLoading] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [newMessageUsers, setNewMessageUsers] = useState("");
+
+  // Room states
+  const [activeTab, setActiveTab] = useState("chats"); // "chats" or "rooms"
+  const [isCreateRoomModalOpen, setIsCreateRoomModalOpen] = useState(false);
+  const [isJoinRoomModalOpen, setIsJoinRoomModalOpen] = useState(false);
 
   const { selectedConversation, setSelectedConversation, messages } =
     userConversation();
@@ -137,7 +145,7 @@ const Sidebar = ({ onSelectUser }) => {
             </div>
             <div>
               <h2 className="text-xl font-bold text-white tracking-tight">
-                Chats
+                {activeTab === "chats" ? "Chats" : "Rooms"}
               </h2>
               <p className="text-xs text-gray-400">
                 {authUser?.username}
@@ -146,185 +154,225 @@ const Sidebar = ({ onSelectUser }) => {
           </div>
         </div>
 
-        {/* 🔍 SEARCH BAR - Glassmorphic */}
-        <form onSubmit={handleSearchSubmit} className="relative group">
-          <div className="
-            absolute left-4 top-1/2 -translate-y-1/2
-            text-gray-400
-            transition-colors duration-200
-            group-focus-within:text-blue-400
-          ">
-            <FaSearch size={16} />
-          </div>
-          <input
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            type="text"
-            placeholder="Search users..."
-            className="
-              w-full
-              bg-[#374151]/30
-              backdrop-blur-md
-              border border-gray-700/50
-              rounded-xl
-              py-3 pl-11 pr-4
-              text-sm text-gray-200
-              placeholder:text-gray-500
-              outline-none
-              transition-all duration-300
-              focus:bg-[#374151]/50
-              focus:border-blue-500/50
-              focus:shadow-lg focus:shadow-blue-500/10
-              hover:border-gray-600
-            "
-          />
-        </form>
+        {/* 📑 TABS */}
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setActiveTab("chats")}
+            className={`
+              flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all
+              ${activeTab === "chats"
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
+                : "bg-[#374151]/30 text-gray-400 hover:bg-[#374151]/50"
+              }
+            `}
+          >
+            💬 Chats
+          </button>
+          <button
+            onClick={() => setActiveTab("rooms")}
+            className={`
+              flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all
+              ${activeTab === "rooms"
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
+                : "bg-[#374151]/30 text-gray-400 hover:bg-[#374151]/50"
+              }
+            `}
+          >
+            🏠 Rooms
+          </button>
+        </div>
+
+        {/* 🔍 SEARCH BAR - Only show for chats tab */}
+        {activeTab === "chats" && (
+          <form onSubmit={handleSearchSubmit} className="relative group">
+            <div className="
+              absolute left-4 top-1/2 -translate-y-1/2
+              text-gray-400
+              transition-colors duration-200
+              group-focus-within:text-blue-400
+            ">
+              <FaSearch size={16} />
+            </div>
+            <input
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              type="text"
+              placeholder="Search users..."
+              className="
+                w-full
+                bg-[#374151]/30
+                backdrop-blur-md
+                border border-gray-700/50
+                rounded-xl
+                py-3 pl-11 pr-4
+                text-sm text-gray-200
+                placeholder:text-gray-500
+                outline-none
+                transition-all duration-300
+                focus:bg-[#374151]/50
+                focus:border-blue-500/50
+                focus:shadow-lg focus:shadow-blue-500/10
+                hover:border-gray-600
+              "
+            />
+          </form>
+        )}
       </div>
 
-      {/* 📋 USER LIST - Smooth Scrolling */}
-      <div className="
-        flex-1
-        overflow-y-auto
-        px-3 py-2
-        scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent
-      ">
-        {loading && (
-          <div className="flex items-center justify-center py-8">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-sm text-gray-400">Loading chats...</p>
-            </div>
-          </div>
-        )}
-
-        {!loading &&
-          (searchUser.length > 0 ? searchUser : chatUser).map((user) => (
-            <div
-              key={user._id}
-              onClick={() => handleUserClick(user)}
-              className={`
-                group
-                flex items-center gap-3
-                p-3 mb-1.5
-                rounded-xl
-                cursor-pointer
-                transition-all duration-200
-                ${selectedUserId === user._id
-                  ? "bg-gradient-to-r from-blue-600 to-blue-500 shadow-lg shadow-blue-500/30 scale-[1.02]"
-                  : "hover:bg-[#374151]/40 active:scale-[0.98]"
-                }
-              `}
-            >
-              {/* Avatar with Status */}
-              <div className="relative flex-shrink-0">
-                <img
-                  src={user.profilepic}
-                  onError={(e) => { e.target.src = `https://api.dicebear.com/7.x/initials/svg?seed=${user.username}`; }}
-                  className={`
-                    w-12 h-12 rounded-full object-cover
-                    transition-all duration-200
-                    ${selectedUserId === user._id
-                      ? "ring-2 ring-white/30"
-                      : "ring-1 ring-gray-700/50 group-hover:ring-gray-600"
-                    }
-                  `}
-                  alt="User"
-                />
-                {/* Online Status Indicator */}
-                {(onlineUser.some((id) => id.toString() === user._id.toString()) ||
-                  onlineUser.map(normalize).includes(normalize(user._id))) && (
-                    <span
-                      className={`
-                        absolute bottom-0 right-0
-                        w-3.5 h-3.5
-                        bg-green-500
-                        rounded-full
-                        ${selectedUserId === user._id
-                          ? "ring-2 ring-white"
-                          : "ring-2 ring-[#1f2937]"
-                        }
-                        animate-pulse
-                      `}
-                    ></span>
-                  )}
+      {/* 📋 CONTENT - Chats or Rooms */}
+      {activeTab === "chats" ? (
+        <div className="
+          flex-1
+          overflow-y-auto
+          px-3 py-2
+          scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent
+        ">
+          {loading && (
+            <div className="flex items-center justify-center py-8">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-sm text-gray-400">Loading chats...</p>
               </div>
+            </div>
+          )}
 
-              {/* User Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-0.5">
+          {!loading &&
+            (searchUser.length > 0 ? searchUser : chatUser).map((user) => (
+              <div
+                key={user._id}
+                onClick={() => handleUserClick(user)}
+                className={`
+                  group
+                  flex items-center gap-3
+                  p-3 mb-1.5
+                  rounded-xl
+                  cursor-pointer
+                  transition-all duration-200
+                  ${selectedUserId === user._id
+                    ? "bg-gradient-to-r from-blue-600 to-blue-500 shadow-lg shadow-blue-500/30 scale-[1.02]"
+                    : "hover:bg-[#374151]/40 active:scale-[0.98]"
+                  }
+                `}
+              >
+                {/* Avatar with Status */}
+                <div className="relative flex-shrink-0">
+                  <img
+                    src={user.profilepic}
+                    onError={(e) => { e.target.src = `https://api.dicebear.com/7.x/initials/svg?seed=${user.username}`; }}
+                    className={`
+                      w-12 h-12 rounded-full object-cover
+                      transition-all duration-200
+                      ${selectedUserId === user._id
+                        ? "ring-2 ring-white/30"
+                        : "ring-1 ring-gray-700/50 group-hover:ring-gray-600"
+                      }
+                    `}
+                    alt="User"
+                  />
+                  {/* Online Status Indicator */}
+                  {(onlineUser.some((id) => id.toString() === user._id.toString()) ||
+                    onlineUser.map(normalize).includes(normalize(user._id))) && (
+                      <span
+                        className={`
+                          absolute bottom-0 right-0
+                          w-3.5 h-3.5
+                          bg-green-500
+                          rounded-full
+                          ${selectedUserId === user._id
+                            ? "ring-2 ring-white"
+                            : "ring-2 ring-[#1f2937]"
+                          }
+                          animate-pulse
+                        `}
+                      ></span>
+                    )}
+                </div>
+
+                {/* User Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-0.5">
+                    <p
+                      className={`
+                        font-semibold text-sm truncate
+                        ${selectedUserId === user._id
+                          ? "text-white"
+                          : "text-gray-200"
+                        }
+                      `}
+                    >
+                      {user.username}
+                    </p>
+
+                    {/* New Message Badge */}
+                    {newMessageUsers?.senderId === user._id && (
+                      <span
+                        className={`
+                          flex items-center justify-center
+                          w-5 h-5
+                          text-[10px] font-bold
+                          rounded-full
+                          ${selectedUserId === user._id
+                            ? "bg-white text-blue-600"
+                            : "bg-green-500 text-white"
+                          }
+                          shadow-md
+                          animate-bounce
+                        `}
+                      >
+                        1
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Status Text */}
                   <p
                     className={`
-                      font-semibold text-sm truncate
+                      text-xs truncate
                       ${selectedUserId === user._id
-                        ? "text-white"
-                        : "text-gray-200"
+                        ? "text-blue-100"
+                        : "text-gray-400"
                       }
                     `}
                   >
-                    {user.username}
+                    {(onlineUser.some((id) => id.toString() === user._id.toString()) ||
+                      onlineUser.map(normalize).includes(normalize(user._id)))
+                      ? "Online"
+                      : "Offline"}
                   </p>
-
-                  {/* New Message Badge */}
-                  {newMessageUsers?.senderId === user._id && (
-                    <span
-                      className={`
-                        flex items-center justify-center
-                        w-5 h-5
-                        text-[10px] font-bold
-                        rounded-full
-                        ${selectedUserId === user._id
-                          ? "bg-white text-blue-600"
-                          : "bg-green-500 text-white"
-                        }
-                        shadow-md
-                        animate-bounce
-                      `}
-                    >
-                      1
-                    </span>
-                  )}
                 </div>
-
-                {/* Status Text */}
-                <p
-                  className={`
-                    text-xs truncate
-                    ${selectedUserId === user._id
-                      ? "text-blue-100"
-                      : "text-gray-400"
-                    }
-                  `}
-                >
-                  {(onlineUser.some((id) => id.toString() === user._id.toString()) ||
-                    onlineUser.map(normalize).includes(normalize(user._id)))
-                    ? "Online"
-                    : "Offline"}
-                </p>
               </div>
-            </div>
-          ))}
+            ))}
 
-        {/* Empty State */}
-        {!loading && chatUser.length === 0 && searchUser.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-            <div className="
-              w-20 h-20 mb-4
-              rounded-full
-              bg-gradient-to-br from-blue-500/20 to-purple-500/20
-              flex items-center justify-center
-              backdrop-blur-sm
-            ">
-              <FaSearch className="text-3xl text-gray-400" />
+          {/* Empty State */}
+          {!loading && chatUser.length === 0 && searchUser.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+              <div className="
+                w-20 h-20 mb-4
+                rounded-full
+                bg-gradient-to-br from-blue-500/20 to-purple-500/20
+                flex items-center justify-center
+                backdrop-blur-sm
+              ">
+                <FaSearch className="text-3xl text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-300 mb-2">
+                No conversations yet
+              </h3>
+              <p className="text-sm text-gray-500 max-w-[200px]">
+                Search for users to start chatting
+              </p>
             </div>
-            <h3 className="text-lg font-semibold text-gray-300 mb-2">
-              No conversations yet
-            </h3>
-            <p className="text-sm text-gray-500 max-w-[200px]">
-              Search for users to start chatting
-            </p>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      ) : (
+        /* Rooms Tab Content */
+        <div className="flex-1 overflow-hidden">
+          <RoomList
+            onCreateRoom={() => setIsCreateRoomModalOpen(true)}
+            onJoinRoom={() => setIsJoinRoomModalOpen(true)}
+          />
+        </div>
+      )}
 
       {/* 🚪 FOOTER - Action Buttons */}
       <div className="
@@ -365,6 +413,16 @@ const Sidebar = ({ onSelectUser }) => {
           )}
         </button>
       </div>
+
+      {/* Modals */}
+      <CreateRoomModal
+        isOpen={isCreateRoomModalOpen}
+        onClose={() => setIsCreateRoomModalOpen(false)}
+      />
+      <JoinRoomModal
+        isOpen={isJoinRoomModalOpen}
+        onClose={() => setIsJoinRoomModalOpen(false)}
+      />
     </div>
   );
 };

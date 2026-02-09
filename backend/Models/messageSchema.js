@@ -34,7 +34,6 @@ export default Message;
 */
 
 import mongoose from "mongoose"
-
 const messageSchema = mongoose.Schema({
     senderId:{
         type:mongoose.Schema.Types.ObjectId,
@@ -44,7 +43,12 @@ const messageSchema = mongoose.Schema({
     reciverId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User",
-        required:true
+        required:false  // ✅ Changed from true to false
+    },
+    roomId:{  // ✅ NEW FIELD - for group chat messages
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Room",
+        required:false
     },
     message:{
         type:String,
@@ -54,7 +58,6 @@ const messageSchema = mongoose.Schema({
         type:String,
         default: null ,
     },
-
     fileName: {
     type: String,
     default: null
@@ -63,19 +66,15 @@ const messageSchema = mongoose.Schema({
         type:String,
         default:null 
     },
-
     fileSize:{
         type:Number,
         default:null , 
     },
-
     conversationId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Conversation',
         default:[]
     },
 },{timestamps:true})
-
 const Message = mongoose.model("Message",messageSchema)
-
 export default Message;

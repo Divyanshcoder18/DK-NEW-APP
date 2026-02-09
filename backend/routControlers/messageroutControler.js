@@ -1,5 +1,6 @@
 import Conversation from "../Models/conversationModels.js";
 import Message from "../Models/messageSchema.js";
+import Room from "../Models/roomSchema.js";
 import { getReciverSocketId,io } from "../Socket/socket.js";
 
 export const sendMessage =async(req,res)=>{
@@ -125,6 +126,63 @@ export const sendFileMessage = async (req, res) => {
     }
 };
 
+// 🏠 SEND ROOM MESSAGE
+export const sendRoomMessage = async (req, res) => {
+    try {
+        // 1️⃣ Get data from request
+        const { roomId } = req.params;           // Room ID from URL
+        const { message } = req.body;            // Message text from request body
+        const senderId = req.user._conditions._id;  // Logged-in user's ID
+
+        // 2️⃣ Validate message
+        if (!message || message.trim() === "") {
+            return res.status(400).json({ error: "Message cannot be empty" });
+        }
+
+        // 3️⃣ Check if room exists and user is a member
+        const room = await Room.findById(roomId);
+        
+        if (!room) {
+            return res.status(404).json({ error: "Room not found" });
+        }
+
+        // Check if user is a member of the room
+        if (!room.members.includes(senderId)) {
+            return res.status(403).json({ error: "You are not a member of this room" });
+        }
+
+        // 4️⃣ Create the new message
+        const newMessage = new Message({
+            senderId,
+            message,
+            roomId: roomId,          
+            conversationId: null     
+        });
+
+        await newMessage.save();
+
+        // 5️⃣ Get sender info to send with message
+        await newMessage.populate("senderId", "username profilepic");
+
+        // 6️⃣ Emit to all users in the room via Socket.io
+        io.to(roomId).emit("new-room-message", {
+            message: newMessage,
+            roomId
+        });
+
+        console.log(`📨 Room message sent to room ${roomId} by ${senderId}`);
+
+        // 7️⃣ Send response back to sender
+        res.status(201).json({
+            success: true,
+            message: newMessage
+        });
+
+    } catch (error) {
+        console.error("❌ Error in sendRoomMessage:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
 
 
 
