@@ -46,14 +46,6 @@ const frontendDistPath = path.join(__dirname, "..", "frontend", "dist");
 if (fs.existsSync(frontendDistPath)) {
   console.log('✅ Serving frontend from:', frontendDistPath);
   app.use(express.static(frontendDistPath));
-
-  // Fallback to index.html for any non-API routes (for React Router)
-  app.get('*', (req, res) => {
-    // Only serve index.html for routes that don't start with /api or /uploads
-    if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
-      res.sendFile(path.join(frontendDistPath, "index.html"));
-    }
-  });
 } else {
   console.log('⚠️ Frontend dist folder not found. Running in API-only mode.');
   console.log('📍 Looking for dist at:', frontendDistPath);
