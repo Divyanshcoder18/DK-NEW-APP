@@ -16,21 +16,18 @@ const RoomList = ({ onCreateRoom, onJoinRoom }) => {
 
     // 2️⃣ Join socket room when user selects a room
     useEffect(() => {
-        if (socket && selectedRoom) {
-            // Leave previous room if any
-            socket.emit("leave-room", { roomId: selectedRoom._id });           
-            // Join the new room
-            socket.emit("join-room", { roomId: selectedRoom._id });
-            console.log(`🏠 Joined room: ${selectedRoom.name}`);
-        }
+        if (!socket || !selectedRoom) return;
+
+        // Join the new room
+        socket.emit("join-room", { roomId: selectedRoom._id });
+        console.log(`🏠 Joined room: ${selectedRoom.name}`);
 
         // Cleanup: leave room when component unmounts or room changes
         return () => {
-            if (socket && selectedRoom) {
-                socket.emit("leave-room", { roomId: selectedRoom._id });
-            }
+            socket.emit("leave-room", { roomId: selectedRoom._id });
+            console.log(`🏠 Left room: ${selectedRoom.name}`);
         };
-    }, [selectedRoom, socket]);
+    }, [selectedRoom?._id, socket]); // Only re-run when selectedRoom ID changes
 
     // 3️⃣ Filter rooms by search term
     const filteredRooms = rooms.filter(room =>
@@ -48,15 +45,15 @@ const RoomList = ({ onCreateRoom, onJoinRoom }) => {
             <div className="room-list-header">
                 <h2>Rooms</h2>
                 <div className="room-actions">
-                    <button 
-                        className="btn-create-room" 
+                    <button
+                        className="btn-create-room"
                         onClick={onCreateRoom}
                         title="Create new room"
                     >
                         ➕
                     </button>
-                    <button 
-                        className="btn-join-room" 
+                    <button
+                        className="btn-join-room"
                         onClick={onJoinRoom}
                         title="Join existing room"
                     >
