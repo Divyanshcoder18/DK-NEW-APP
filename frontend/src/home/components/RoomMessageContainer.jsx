@@ -192,7 +192,7 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
                                             : "bg-[#1f1f22] text-gray-200 rounded-2xl rounded-tl-md border border-gray-700"
                                             }`}
                                     >
-                                        <p>{typeof msg.message === 'object' ? msg.message?.text || JSON.stringify(msg.message) : msg.message || 'No message'}</p>
+                                        <p>{msg.message || 'No message'}</p>
                                         <p
                                             className={`text-[10px] mt-1 text-right opacity-60 ${isMe ? "text-gray-200" : "text-gray-400"
                                                 }`}
