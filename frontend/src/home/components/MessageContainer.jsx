@@ -107,16 +107,10 @@ const MessageContainer = ({ onBackUser }) => {
       );
       const sentMessage = res.data;
 
-      socket?.emit("sendMessage", {
-        senderId: authUser._id,
-        receiverId,
-        message: sendData,
-        _id: sentMessage._id,
-        createdAt: sentMessage.createdAt,
-      });
+      // Backend API already broadcasts via socket.io (line 39 in messageController)
+      // No need to emit here - that causes duplicates!
+      // The socket listener will receive the message and add to state
 
-      // Don't add to local state here - socket listener will handle it
-      // This prevents duplicate messages
       setSendData("");
       setShouldScroll(true); // Enable scroll when user sends a message
     } catch (err) {

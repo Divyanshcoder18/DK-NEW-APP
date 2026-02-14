@@ -33,10 +33,29 @@ export const sendMessage = async (req, res) => {
 
         await Promise.all([chats.save(), newMessages.save()]);
 
-        //SOCKET.IO function 
+        //SOCKET.IO function - Emit to BOTH sender and receiver
         const reciverSocketId = getReciverSocketId(reciverId);
+        const senderSocketId = getReciverSocketId(senderId.toString());
+
+        // Create message object with string IDs for consistent comparison
+        const messageToEmit = {
+            _id: newMessages._id,
+            senderId: senderId.toString(), // Convert to string!
+            reciverId: reciverId.toString(),
+            message: newMessages.message,
+            fileUrl: newMessages.fileUrl,
+            createdAt: newMessages.createdAt,
+            conversationId: newMessages.conversationId
+        };
+
+        // Emit to receiver
         if (reciverSocketId) {
-            io.to(reciverSocketId).emit("newMessage", newMessages)
+            io.to(reciverSocketId).emit("newMessage", messageToEmit);
+        }
+
+        // Emit to sender too (so they see their own message)
+        if (senderSocketId) {
+            io.to(senderSocketId).emit("newMessage", messageToEmit);
         }
 
         res.status(201).send(newMessages)
