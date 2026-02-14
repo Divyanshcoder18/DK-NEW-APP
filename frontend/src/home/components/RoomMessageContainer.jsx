@@ -152,10 +152,13 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
                 {!loading &&
                     Array.isArray(roomMessages) &&
                     roomMessages.map((msg, index) => {
+                        // Get sender ID - handle both populated and unpopulated cases
                         const messageSenderId = typeof msg.senderId === "object"
                             ? msg.senderId?._id
                             : msg.senderId;
-                        const isMe = messageSenderId === authUser?._id;
+
+                        // IMPORTANT: Convert both to strings for comparison to avoid type issues
+                        const isMe = String(messageSenderId) === String(authUser?._id);
 
                         // Better sender name extraction with fallback
                         let senderName = "Unknown";
