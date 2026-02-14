@@ -38,7 +38,6 @@ const RoomList = ({ onCreateRoom, onJoinRoom }) => {
     const handleRoomClick = (room) => {
         setSelectedRoom(room);
     };
-
     return (
         <div className="room-list-container">
             {/* Header with action buttons */}
