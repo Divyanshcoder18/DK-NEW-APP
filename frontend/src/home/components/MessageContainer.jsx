@@ -328,7 +328,8 @@ const MessageContainer = ({ onBackUser }) => {
         {!loading &&
           Array.isArray(messages) &&
           messages.map((msg, index) => {
-            const isMe = msg.senderId === authUser._id;
+            // Convert both IDs to strings for comparison to avoid type issues
+            const isMe = String(msg.senderId) === String(authUser._id);
             return (
               <div
                 key={msg?._id || index}
