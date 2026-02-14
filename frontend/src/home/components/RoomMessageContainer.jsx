@@ -30,11 +30,6 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
         if (!socket) return;
 
         const handleNewRoomMessage = (data) => {
-            console.log("📨 Room message received:", data);
-            console.log("📨 New room message received:", data?.message?._id || "No ID");
-            console.log("📨 Message object:", data.message);
-            console.log("📨 Message text (data.message.message):", data.message?.message);
-
             // Play notification sound if message is from someone else
             const messageSenderId = typeof data.message?.senderId === "object"
                 ? data.message?.senderId?._id
@@ -47,7 +42,6 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
 
             // Add message to state if it's for the current room
             if (data.roomId === selectedRoom?._id) {
-                console.log("📨 Adding message to state");
                 setRoomMessages((prev) => [...prev, data.message]);
                 setShouldScroll(true);
             }
@@ -171,6 +165,13 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
                             ? msg.senderId?.username
                             : "Unknown";
 
+                        // Safely extract message text
+                        const messageText = typeof msg.message === "string"
+                            ? msg.message
+                            : (typeof msg.message === "object" && msg.message !== null)
+                                ? (msg.message.text || msg.message.message || JSON.stringify(msg.message))
+                                : "No message";
+
                         return (
                             <div
                                 key={msg?._id || index}
@@ -192,7 +193,7 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
                                             : "bg-[#1f1f22] text-gray-200 rounded-2xl rounded-tl-md border border-gray-700"
                                             }`}
                                     >
-                                        <p>{msg.message || 'No message'}</p>
+                                        <p>{messageText}</p>
                                         <p
                                             className={`text-[10px] mt-1 text-right opacity-60 ${isMe ? "text-gray-200" : "text-gray-400"
                                                 }`}
