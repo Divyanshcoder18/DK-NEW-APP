@@ -109,7 +109,8 @@ const MessageContainer = ({ onBackUser }) => {
         createdAt: sentMessage.createdAt,
       });
 
-      setMessage((prev) => [...prev, sentMessage]);
+      // Don't add to local state here - socket listener will handle it
+      // This prevents duplicate messages
       setSendData("");
       setShouldScroll(true); // Enable scroll when user sends a message
     } catch (err) {
