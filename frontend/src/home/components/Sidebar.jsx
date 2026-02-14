@@ -187,7 +187,7 @@ const Sidebar = ({ onSelectUser, onSelectRoom }) => {
           <form onSubmit={handleSearchSubmit} className="relative group">
             <div className="
               absolute left-4 top-1/2 -translate-y-1/2
-              text-gray-400
+              text-gray-300
               transition-colors duration-200
               group-focus-within:text-blue-400
             ">

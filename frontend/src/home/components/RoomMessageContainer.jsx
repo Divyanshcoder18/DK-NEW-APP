@@ -156,9 +156,20 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
                             ? msg.senderId?._id
                             : msg.senderId;
                         const isMe = messageSenderId === authUser?._id;
-                        const senderName = typeof msg.senderId === "object"
-                            ? msg.senderId?.username
-                            : "Unknown";
+
+                        // Better sender name extraction with fallback
+                        let senderName = "Unknown";
+                        if (typeof msg.senderId === "object" && msg.senderId?.username) {
+                            senderName = msg.senderId.username;
+                        } else if (!isMe) {
+                            // If sender data isn't populated, try to get from room members
+                            const member = selectedRoom?.members?.find(m =>
+                                (typeof m === "object" ? m._id : m) === messageSenderId
+                            );
+                            if (member && typeof member === "object") {
+                                senderName = member.username;
+                            }
+                        }
 
                         // Safely extract message text
                         const messageText = typeof msg.message === "string"
@@ -166,6 +177,14 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
                             : (typeof msg.message === "object" && msg.message !== null)
                                 ? (msg.message.text || msg.message.message || JSON.stringify(msg.message))
                                 : "No message";
+
+                        // Safe timestamp formatting
+                        const timestamp = msg?.createdAt
+                            ? new Date(msg.createdAt).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })
+                            : "";
 
                         return (
                             <div
@@ -175,7 +194,7 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
                             >
                                 <div className={`max-w-[75%] ${isMe ? "" : "flex flex-col"}`}>
                                     {/* Sender name (only for others) */}
-                                    {!isMe && (
+                                    {!isMe && senderName !== "Unknown" && (
                                         <span className="text-xs text-gray-400 mb-1 ml-2">
                                             {senderName}
                                         </span>
@@ -189,15 +208,14 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
                                             }`}
                                     >
                                         <p>{messageText}</p>
-                                        <p
-                                            className={`text-[10px] mt-1 text-right opacity-60 ${isMe ? "text-gray-200" : "text-gray-400"
-                                                }`}
-                                        >
-                                            {new Date(msg?.createdAt).toLocaleTimeString([], {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            })}
-                                        </p>
+                                        {timestamp && (
+                                            <p
+                                                className={`text-[10px] mt-1 text-right opacity-60 ${isMe ? "text-gray-200" : "text-gray-400"
+                                                    }`}
+                                            >
+                                                {timestamp}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -232,7 +250,7 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
                     </button>
                 </div>
             </form>
-        </div>
+        </div >
     );
 };
 
