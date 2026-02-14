@@ -30,10 +30,14 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
         if (!socket) return;
 
         const handleNewRoomMessage = (data) => {
-            console.log("📨 New room message received:", data);
+            console.log("📨 New room message received:", data?.message?._id || "No ID");
 
             // Play notification sound if message is from someone else
-            if (data.message?.senderId?._id !== authUser._id) {
+            const messageSenderId = typeof data.message?.senderId === "object"
+                ? data.message?.senderId?._id
+                : data.message?.senderId;
+
+            if (messageSenderId && messageSenderId !== authUser?._id) {
                 const sound = new Audio(notify);
                 sound.play();
             }
@@ -155,8 +159,13 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
                 {!loading &&
                     Array.isArray(roomMessages) &&
                     roomMessages.map((msg, index) => {
-                        const isMe = msg.senderId?._id === authUser._id;
-                        const senderName = msg.senderId?.username || "Unknown";
+                        const messageSenderId = typeof msg.senderId === "object"
+                            ? msg.senderId?._id
+                            : msg.senderId;
+                        const isMe = messageSenderId === authUser?._id;
+                        const senderName = typeof msg.senderId === "object"
+                            ? msg.senderId?.username
+                            : "Unknown";
 
                         return (
                             <div
@@ -175,8 +184,8 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
                                     {/* Message bubble */}
                                     <div
                                         className={`px-4 py-2 text-sm font-medium shadow-md transition-all ${isMe
-                                                ? "bg-blue-600 text-white rounded-2xl rounded-tr-md shadow-blue-900/50"
-                                                : "bg-[#1f1f22] text-gray-200 rounded-2xl rounded-tl-md border border-gray-700"
+                                            ? "bg-blue-600 text-white rounded-2xl rounded-tr-md shadow-blue-900/50"
+                                            : "bg-[#1f1f22] text-gray-200 rounded-2xl rounded-tl-md border border-gray-700"
                                             }`}
                                     >
                                         <p>{msg.message}</p>

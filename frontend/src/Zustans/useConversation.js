@@ -27,7 +27,16 @@ const userConversation = create((set) => ({
     rooms: [],
     setRooms: (rooms) => {
         console.log("🏠 [ZUSTAND] setRooms called with:", rooms);
-        set({ rooms });
+        if (typeof rooms === 'function') {
+            set((state) => {
+                const newRooms = rooms(state.rooms);
+                console.log("🏠 [ZUSTAND] Previous rooms:", state.rooms);
+                console.log("🏠 [ZUSTAND] New rooms:", newRooms);
+                return { rooms: newRooms };
+            });
+        } else {
+            set({ rooms });
+        }
     },
 
     // Selected room
