@@ -72,14 +72,14 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
         const result = await sendRoomMessage(selectedRoom._id, { message: messageText });
 
         if (result) {
-            // Emit to socket for real-time delivery
+            // Emit to socket for real-time delivery to all room members
             socket?.emit("room-message", {
                 message: result.message,
                 roomId: selectedRoom._id,
             });
 
-            // Add message to local state
-            setRoomMessages((prev) => [...prev, result.message]);
+            // Note: Don't add to local state here - the socket listener will handle it
+            // This prevents duplicate messages
             setMessageText("");
             setShouldScroll(true);
         }
