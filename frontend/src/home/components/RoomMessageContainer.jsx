@@ -42,7 +42,12 @@ const RoomMessageContainer = ({ onBackToRooms }) => {
 
             // Add message to state if it's for the current room
             if (data.roomId === selectedRoom?._id) {
-                setRoomMessages((prev) => [...prev, data.message]);
+                setRoomMessages((prev) => {
+                    // Check if message already exists to prevent duplicates
+                    const messageExists = prev.some(msg => msg._id === data.message._id);
+                    if (messageExists) return prev;
+                    return [...prev, data.message];
+                });
                 setShouldScroll(true);
             }
         };

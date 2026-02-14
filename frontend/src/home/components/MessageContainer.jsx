@@ -50,11 +50,17 @@ const MessageContainer = ({ onBackUser }) => {
   useEffect(() => {
     if (!socket) return;
     const handleNewMessage = (newMessage) => {
+      // Check if message already exists to prevent duplicates and sequence issues
+      setMessage((prev) => {
+        const messageExists = prev.some(msg => msg._id === newMessage._id);
+        if (messageExists) return prev;
+        return [...prev, newMessage];
+      });
+
       if (newMessage.senderId !== authUser._id) {
         const sound = new Audio(notify);
         sound.play();
       }
-      setMessage((prev) => [...prev, newMessage]);
     };
     socket.on("newMessage", handleNewMessage);
     return () => socket.off("newMessage", handleNewMessage);
