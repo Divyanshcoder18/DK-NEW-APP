@@ -1,75 +1,75 @@
 import Conversation from "../Models/conversationModels.js";
 import Message from "../Models/messageSchema.js";
 import Room from "../Models/roomSchema.js";
-import { getReciverSocketId,io } from "../Socket/socket.js";
+import { getReciverSocketId, io } from "../Socket/socket.js";
 
-export const sendMessage =async(req,res)=>{
-try {
-    const {messages} = req.body;
-    const {id:reciverId} = req.params;
-    const senderId = req.user._conditions._id;
+export const sendMessage = async (req, res) => {
+    try {
+        const { messages } = req.body;
+        const { id: reciverId } = req.params;
+        const senderId = req.user._id;
 
 
-    let chats = await Conversation.findOne({
-        participants:{$all:[senderId , reciverId]}
-    })
-
-    if(!chats){
-        chats = await Conversation.create({
-            participants:[senderId , reciverId],
+        let chats = await Conversation.findOne({
+            participants: { $all: [senderId, reciverId] }
         })
+
+        if (!chats) {
+            chats = await Conversation.create({
+                participants: [senderId, reciverId],
+            })
+        }
+
+        const newMessages = new Message({
+            senderId,
+            reciverId,
+            message: messages,
+            conversationId: chats._id
+        })
+
+        if (newMessages) {
+            chats.messages.push(newMessages._id);
+        }
+
+        await Promise.all([chats.save(), newMessages.save()]);
+
+        //SOCKET.IO function 
+        const reciverSocketId = getReciverSocketId(reciverId);
+        if (reciverSocketId) {
+            io.to(reciverSocketId).emit("newMessage", newMessages)
+        }
+
+        res.status(201).send(newMessages)
+
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: error
+        })
+        console.log(`error in sendMessage ${error}`);
     }
+}
 
-    const newMessages = new Message({
-        senderId,
-        reciverId,
-        message:messages,
-        conversationId: chats._id
-    })
 
-    if(newMessages){
-        chats.messages.push(newMessages._id);
+export const getMessages = async (req, res) => {
+    try {
+        const { id: reciverId } = req.params;
+        const senderId = req.user._id;
+
+        const chats = await Conversation.findOne({
+            participants: { $all: [senderId, reciverId] }
+        }).populate("messages")
+
+        if (!chats) return res.status(200).send([]);
+        const message = chats.messages;
+        res.status(200).send(message)
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: error
+        })
+        console.log(`error in getMessage ${error}`);
     }
-
-    await Promise.all([chats.save(),newMessages.save()]);
-
-     //SOCKET.IO function 
-     const reciverSocketId = getReciverSocketId(reciverId);
-     if(reciverSocketId){
-        io.to(reciverSocketId).emit("newMessage",newMessages)
-     }
-
-    res.status(201).send(newMessages)
-
-} catch (error) {
-    res.status(500).send({
-        success: false,
-        message: error
-    })
-    console.log(`error in sendMessage ${error}`);
-}
-}
-
-
-export const getMessages=async(req,res)=>{
-try {
-    const {id:reciverId} = req.params;
-    const senderId = req.user._conditions._id;
-
-    const chats = await Conversation.findOne({
-        participants:{$all:[senderId , reciverId]}
-    }).populate("messages")
-
-    if(!chats)  return res.status(200).send([]);
-    const message = chats.messages;
-    res.status(200).send(message)
-} catch (error) {
-    res.status(500).send({
-        success: false,
-        message: error
-    })
-    console.log(`error in getMessage ${error}`);
-}
 }
 
 
@@ -77,7 +77,7 @@ try {
 export const sendFileMessage = async (req, res) => {
     try {
         const { id: reciverId } = req.params;
-        const senderId = req.user._conditions._id;
+        const senderId = req.user._id;
 
         if (!req.file) {
             return res.status(400).send({ error: 'No file uploaded' });
@@ -132,7 +132,7 @@ export const sendRoomMessage = async (req, res) => {
         // 1️⃣ Get data from request
         const { roomId } = req.params;           // Room ID from URL
         const { message } = req.body;            // Message text from request body
-        const senderId = req.user._conditions._id;  // Logged-in user's ID
+        const senderId = req.user._id;  // Logged-in user's ID
 
         // 2️⃣ Validate message
         if (!message || message.trim() === "") {
@@ -141,7 +141,7 @@ export const sendRoomMessage = async (req, res) => {
 
         // 3️⃣ Check if room exists and user is a member
         const room = await Room.findById(roomId);
-        
+
         if (!room) {
             return res.status(404).json({ error: "Room not found" });
         }
@@ -155,8 +155,8 @@ export const sendRoomMessage = async (req, res) => {
         const newMessage = new Message({
             senderId,
             message,
-            roomId: roomId,          
-            conversationId: null     
+            roomId: roomId,
+            conversationId: null
         });
 
         await newMessage.save();

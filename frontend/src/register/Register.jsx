@@ -49,8 +49,9 @@ const Register = () => {
         return toast.error(data.message);
       }
 
-      toast.success("You have registered successfully! Now you can login.");
-      navigate("/login");
+      toast.success("Registration successful! Welcome!");
+      setAuthUser(data);  // Set the authenticated user
+      navigate("/");  // Navigate to home since user is auto-logged in
     } catch (error) {
       toast.error(error?.response?.data?.message || "Registration failed");
     } finally {

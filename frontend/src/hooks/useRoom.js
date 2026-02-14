@@ -38,6 +38,7 @@ export const useCreateRoom = () => {
         } catch (error) {
             toast.error(error.response?.data?.error || "Failed to create room");
             console.error("Error creating room:", error);
+            return null;  // ✅ Return null on error to keep modal open
         } finally {
             setLoading(false);
         }
