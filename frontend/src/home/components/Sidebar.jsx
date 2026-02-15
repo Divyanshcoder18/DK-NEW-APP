@@ -200,19 +200,19 @@ const Sidebar = ({ onSelectUser, onSelectRoom }) => {
               placeholder="Search users..."
               className="
                 w-full
-                bg-[#374151]/30
+                bg-[#374151]/60
                 backdrop-blur-md
-                border border-gray-700/50
+                border border-gray-600
                 rounded-xl
                 py-3 pl-11 pr-4
-                text-sm text-gray-200
-                placeholder:text-gray-500
+                text-sm text-white
+                placeholder:text-gray-400
                 outline-none
                 transition-all duration-300
-                focus:bg-[#374151]/50
-                focus:border-blue-500/50
-                focus:shadow-lg focus:shadow-blue-500/10
-                hover:border-gray-600
+                focus:bg-[#374151]/80
+                focus:border-blue-500
+                focus:shadow-lg focus:shadow-blue-500/20
+                hover:border-gray-500
               "
             />
           </form>
