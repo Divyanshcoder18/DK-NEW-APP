@@ -60,8 +60,8 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-bg-primary p-4 overflow-y-auto">
-      <div className="w-full max-w-sm my-8">
+    <div className="h-screen w-full flex justify-center bg-bg-primary overflow-y-auto">
+      <div className="w-full max-w-sm my-8 px-4">
 
         {/* HEADER */}
         <div className="mb-8">
