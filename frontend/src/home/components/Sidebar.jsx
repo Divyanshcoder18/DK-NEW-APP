@@ -218,7 +218,6 @@ const Sidebar = ({ onSelectUser, onSelectRoom }) => {
           </form>
         )}
       </div>
-
       {/* 📋 CONTENT - Chats or Rooms */}
       {activeTab === "chats" ? (
         <div className="
