@@ -187,7 +187,7 @@ const Sidebar = ({ onSelectUser, onSelectRoom }) => {
           <form onSubmit={handleSearchSubmit} className="relative group">
             <div className="
               absolute left-4 top-1/2 -translate-y-1/2
-              text-gray-300
+              text-white
               transition-colors duration-200
               group-focus-within:text-blue-400
             ">
@@ -200,16 +200,16 @@ const Sidebar = ({ onSelectUser, onSelectRoom }) => {
               placeholder="Search users..."
               className="
                 w-full
-                bg-[#374151]/60
+                bg-[#374151]/90
                 backdrop-blur-md
                 border border-gray-600
                 rounded-xl
                 py-3 pl-11 pr-4
                 text-sm text-white
-                placeholder:text-gray-400
+                placeholder:text-gray-200
                 outline-none
                 transition-all duration-300
-                focus:bg-[#374151]/80
+                focus:bg-[#374151]/100
                 focus:border-blue-500
                 focus:shadow-lg focus:shadow-blue-500/20
                 hover:border-gray-500
